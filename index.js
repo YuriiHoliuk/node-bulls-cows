@@ -1,35 +1,26 @@
-const readline = require('readline');
+const GameServer = require('./server');
+
+
 
 class Game {
   constructor() {
+    this[Symbol.for('GAME_TYPE')] = true;
+    this._onReq = this._onReq.bind(this);
+    this.gameServer = new GameServer(this._onReq);
+  }
+
+  isGame() {
+    return !!this[Symbol.for('GAME_TYPE')];
   }
 
   start() {
-    this.readline = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-    this.number = this._randomInteger(4);
-    this.question('Відгадай число\n');
+    this.restart();
+    this.gameServer.listen(3000);
   }
 
-  question(message) {
-      this.readline.question(message, answer => {
-        const result = this._checkNumber(answer);
-
-        if (!result) {
-            this.question('Дані невірні, повторіть\n');
-        }
-
-        const { bulls, cows } = result;
-
-        if (bulls === 4) {
-            console.log('Ви виграли!\n');
-            this.readline.close();
-        }
-
-        this.question(`Bulls: ${bulls}, Cows: ${cows}\n`);
-      });
+  restart() {
+    this.number = this._randomInteger(4);
+    console.log(this.number);
   }
 
   _randomInteger(count) {
@@ -62,6 +53,24 @@ class Game {
     }
 
     return { bulls, cows };
+  }
+
+  _onReq(req, res) {
+    const userNumber = req.url.replace('/', '');
+    const result = this._checkNumber(userNumber);
+
+    if (!result) {
+        res.end('Дані невірні, повторіть\n');
+    }
+
+    const { bulls, cows } = result;
+
+    if (bulls === 4) {
+        res.end('You win\n');
+        this.restart();
+    }
+
+    res.end(`Bulls: ${bulls}, Cows: ${cows}\n`);
   }
 }
 
