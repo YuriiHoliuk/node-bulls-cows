@@ -1,0 +1,37 @@
+// Promise - object
+
+// PENDINDING
+// RESOLVED
+// REJECTED
+
+const promise = new Promise((resolve, reject) => {
+  // logic
+  // success resolve(data);
+  // fail reject(error);
+
+  setTimeout(() => {
+    const randomNumber = Math.random();
+  
+    randomNumber >= 0.5
+      ? resolve(randomNumber)
+      : reject(new Error('too low number'));
+  }, 2000);
+});
+
+// promise
+//   .then(data => console.log(data))
+//   .catch(error => console.error(error.message))
+//   .finally(() => console.warn('Done'));
+
+fetch('https://swapi.co/api/planets')
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        throw 'sdsdsd';
+        return data;
+    })
+    .then(({ results }) => results)
+    .then(planetsList => fetch(`https://swapi.co/api/planets/3/`))
+    .then(response => response.json())
+    .then(planetData => console.log(planetData))
+    .catch(error => console.log(error));
